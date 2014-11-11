@@ -1,4 +1,5 @@
-import networkx as network
+import itertools
+import networkx as nx
 import nltk
 from nltk.stem.porter import PorterStemmer
 
@@ -70,7 +71,16 @@ class SimpleGraphBuilder(GraphBuilder):
         self.text_cleaner = text_cleaner
 
     def create_graph(self):
-        # TODO: Build graph
-        pass
-
-
+        G=nx.Graph() 
+        for text in self.text_sentences:
+            text_words = []
+            for sentence in text:
+                G.add_nodes_from(sentence)
+                text_words += sentence
+            for (a,b) in itertools.combinations(text_words,2):
+                if G.has_edge(a,b):
+                    G[a][b]['weight'] = G.get_edge_data(a,b)['weight'] + 1
+                else:
+                    G.add_edge(a,b, weight=1. )
+        return G
+                
