@@ -74,7 +74,13 @@ def DefaultClean(elem):
 	return (not (_is_invalid(elem) or _is_empty(elem) or _is_excluded(elem)))
 
 class NewsScraper(object):
-	"""NewsScraper -- A generic class for pulling from a news site, and dumping to a usable format."""
+	"""NewsScraper -- A generic class for pulling from a news site, and dumping to a usable format.
+
+	>>> news = NewsScraper('http://cnn.com')
+	>>> news.pull()
+	>>> news.scrape(10)
+	>>> articles = news.polished()
+	"""
 	def __init__(self, website = '', nthreads = 10, memoize_articles = False):
 		super(NewsScraper, self).__init__()
 		self.website = website
@@ -97,6 +103,9 @@ class NewsScraper(object):
 		self.paper = newspaper.build(self.website, memoize_articles= self.memoize_articles, number_threads = 20, fetch_images = False, verbose = False)
 
 	def scrape(self, num_articles = None):
+		'''
+		Performs mapreduce on the article downloading and parsing process.
+		'''
 		pool = Pool(self.nthreads) # on 100 processors
 		engine = Engine(False)
 		if num_articles is not None:
@@ -105,7 +114,15 @@ class NewsScraper(object):
 		else:
 			self.corpus += pool.map(engine, self.paper.articles)
  
-	def polished(self, cleaner = None):
+	def polished(self, cleaner = DefaultClean):
+		'''
+		By default, uses DefaultClean() which deletes empty articles and urls that 
+		match the default exclude list. The cleaner parameter can be any function 
+		that takes as input a dictionary with the fields 'text', 'url', and 'title', 
+		and produces a boolean indicating whether or not it should be included.
+
+		This produces a generator through list comprehention to save memory.
+		'''
 		if cleaner is not None:
 			return (article for article in self.corpus if cleaner(article))
 		return self.corpus
