@@ -1,5 +1,22 @@
 import networkx as nx
 import numpy as np
+from sklearn.preprocessing import normalize
+
+# from scipy.linalg import eigh
+from scipy.sparse.linalg import eigsh
+
+
+def SpectralEmbedding(G, k = 5):
+    '''
+    Takes a input Graph, and embeds it into k-dimensional
+    euclidean space using a top-k-eigenvector embedding.
+    '''
+
+    # creates row normalized weight matrix
+    M = normalize(nx.adj_matrix(G.copy()), norm='l1', axis=1)
+    _, v = eigsh(M, k = k, which = 'LM')
+    return v
+
 
 def MCL_cluster(G,ex,r,tol,threshold):
     """
