@@ -1,17 +1,18 @@
 import networkx as nx
 import numpy as np
 
-def MCL_cluster(G,ex,r,tol):
+def MCL_cluster(G,ex,r,tol,threshold):
     """
     Computes a clustering of graph G using the MCL algorithm 
     with power parameter ex and inflation parameter r
     The algorithm runs until the relative decrease in norm 
-    is lower than tol or after 10,000 iterations    
+    is lower than tol or after 10,000 iterations
+    Returns an array whose values are greater than threshold
     Leaves the graph G unchanged
     """
 
-    M = nx.adj_matrix(G.copy())
-    inflate(M,1)
+    M = np.array(nx.adj_matrix(G.copy()))
+    M = inflate(M,1)
 
     norm_old = 0
     norm_new = np.linalg.norm(M)
@@ -21,25 +22,26 @@ def MCL_cluster(G,ex,r,tol):
         it += 1
         norm_old = norm_new
         M = M**ex
-        inflate(M,r)
+        M = inflate(M,r)
         norm_new = np.linalg.norm(M)
-        print "iteration %s" %it
-        print "prop. decrease %s" %(abs(norm_old-norm_new)/norm_old)
+        if __name__ == '__main__':
+            # debugging
+            print "iteration %s" %it
+            print "prop. decrease %s" %(abs(norm_old-norm_new)/norm_old)
         if abs(norm_old-norm_new)/norm_old < tol:
             print it
             break
+    M[M < threshold] = 0
     return M
 
 def inflate(M,r):
     """
-    Inflates the numpy matrix M columnwise by a factor r (in place)
+    Returns a copy of the numpy array M inflated columnwise by a factor r
     Rmk: r = 1 makes M stochastic
     """
-    for j in range(M.shape[1]):
-        col_sum = sum( [x**r for x in M[:,j]] )
-        for i in range(M.shape[0]):
-            M[i,j] = M[i,j]**r/col_sum
-    return 
+    col_sums = np.power(M,r).sum(axis=0)
+    mat = np.power(M,r) / col_sums[np.newaxis,:]
+    return mat
 
 def add_self_loops(G):
     """
@@ -49,15 +51,22 @@ def add_self_loops(G):
     for node in G.nodes():
         if not G.has_edge(node, node):
             G.add_edge(node, node, weight=1.)
-
-""" testing """
-#G = nx.Graph()
-#L = ['a','b','c','d']
-#G.add_nodes_from(L)
-#G.add_weighted_edges_from([('a','b',1),('c','b',2),('c','a',1),('d','a',1)])
-G = nx.fast_gnp_random_graph(5,.9)
-mat = nx.adj_matrix(G)
-tol = 0.000001
-ex = 2
-r = 2
-print MCL_cluster(G,ex,r,tol)
+            
+if __name__ == '__main__':
+    """ 
+    debugging  code
+    """
+    G = nx.Graph()
+    L = ['a','b','c','d']
+    G.add_nodes_from(L)
+    G.add_weighted_edges_from([('a','b',1),('c','b',2),('c','a',1),('d','a',1)])
+    mat = np.array(nx.adj_matrix(G))
+#    G = nx.fast_gnp_random_graph(40,.5)
+#    mat[0,0] = 10
+    tol = 1e-5
+    threshold = 1e-5
+    ex = 2
+    r = 2
+    print mat
+    m = MCL_cluster(G,ex,r,tol,threshold)
+    print m

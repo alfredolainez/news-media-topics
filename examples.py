@@ -43,6 +43,7 @@ print "Graph built in %.2f sec" %(t2-t1)
 ex = 2
 r = 2
 tol = 1e-3
-M = graph_cluster.MCL_cluster(G,ex,r,tol)
+threshold = 1e-5
+M = graph_cluster.MCL_cluster(G,ex,r,tol,threshold)
 t3 = time.time()
 print "Graph clustered in %.2f sec" %(t3-t2)
