@@ -2,6 +2,7 @@ import itertools
 import networkx as nx
 import nltk
 from nltk.stem.porter import PorterStemmer
+import igraph
 
 def stem_words(tokens, language='english'):
     """
@@ -83,4 +84,59 @@ class SimpleGraphBuilder(GraphBuilder):
                 else:
                     G.add_edge(a,b, weight=1. )
         return G
-                
+
+    def create_igraph(self):
+        G = igraph.Graph()
+        G.es['weight'] = 1.0
+        first_node = True
+        for text in self.text_sentences:
+            print "A text"
+            text_words = []
+            for sentence in text:
+                print "A sentence"
+                for token in sentence:
+                    ## if not 'name' in G.vs: Try to find way!
+                    if first_node:
+                        G.add_vertex(name=token)
+                        first_node = False
+                    elif token not in G.vs['name']:
+                        G.add_vertex(name=token)
+                text_words += sentence
+            for (a,b) in itertools.combinations(text_words, 2):
+                if a != b:
+                    if G[a,b] != 0:
+                        G[a,b] = G[a,b] + 1
+                    else:
+                        G[a,b] = 1
+        return G
+
+    # Improved version: using nodes by ids and keeping the difference ourselves
+    def create_igraph2(self):
+        ids_by_token = {}
+        current_id = 0
+        G = igraph.Graph()
+        G.es['weight'] = 1.0
+
+        n_text = 1
+
+        for text in self.text_sentences:
+            print "Processing text %d of %d" % (n_text, len(self.text_sentences))
+            text_words = []
+            for sentence in text:
+                for token in sentence:
+                    if not token in ids_by_token:
+                        G.add_vertex(name=token)
+                        ids_by_token[token] = current_id
+                        current_id += 1
+                text_words += sentence
+            for (token_a,token_b) in itertools.combinations(text_words, 2):
+                a = ids_by_token[token_a]
+                b = ids_by_token[token_b]
+                if a != b:
+                    if G[a,b] != 0:
+                        G[a,b] = G[a,b] + 1
+                    else:
+                        G[a,b] = 1
+            n_text += 1
+        return G, ids_by_token
+
