@@ -5,6 +5,8 @@ import text_processing
 import time
 import community
 
+from sklearn.preprocessing import scale
+from sklearn.cluster import KMeans
 
 def get_words_by_partition(partition):
     """
@@ -114,6 +116,26 @@ for counter in xrange(0, len(words_by_part)):
 	H = G.subgraph(words_by_part[counter])
 	print ', '.join(graph_cluster.pagerank_top_k(H, 10))
 
+
+
+# -- example using noun phrases
+
+gb = NounPhraseGraphBuilder(text_processing.clean_punctuation_and_stopwords)
+texts = (article['text'] for article in news.polished())
+gb.load_texts(texts)
+G = gb.create_graph(graphtype='occurence')
+
+X = scale(graph_cluster.SpectralEmbedding(G, k = 20))
+kmeans = KMeans(init='k-means++', n_clusters=20, n_init=10)
+
+clusters = kmeans.fit_predict(X)
+
+for cluster in set(clusters):
+	print '\nTopic {}:\n----------'.format(cluster)
+	nodes_in_cluster = np.array(G.nodes())[clusters == cluster]
+	H = G.subgraph(nodes_in_cluster)
+	# print ', '.join(graph_cluster.pagerank_top_k(H, 10))
+	print ', '.join(pagerank_top_k(H, 10))
 
 
 
