@@ -3,6 +3,7 @@ Set of functions that process texts.
 They are meant as parameters of GraphBuilder objects
 """
 import string
+import enchant
 
 import nltk
 
@@ -38,11 +39,27 @@ def remove_punctuation(tokens):
 
     return not_punct_words
 
+def remove_dictionary_words(tokens):
+    """
+    Removes words present in the dictionary
+    """
+    d = enchant.Dict("en_US")
+    new_tokens = []
+    for token in tokens:
+        if not d.check(token):
+            new_tokens.append(token)
+    return new_tokens
+
 def clean_punctuation_and_stopwords(tokens):
     tokens = remove_punctuation(tokens)
     tokens = clean_stopwords(tokens)
     return tokens
 
-
+def only_non_dictionary_words(tokens):
+    tokens = remove_punctuation(tokens)
+    tokens = clean_stopwords(tokens)
+    tokens = remove_dictionary_words(tokens)
+    # To do: some particles like nt remain...
+    return tokens
 
 

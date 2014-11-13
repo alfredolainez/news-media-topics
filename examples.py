@@ -84,15 +84,30 @@ words_by_part = get_words_by_partition(partition)
 
 
 # -- example using noun phrases
+#
+# gb = NounPhraseGraphBuilder(text_processing.clean_punctuation_and_stopwords)
+# texts = (article['text'] for article in news.polished())
+# gb.load_texts(texts)
+# G = gb.create_graph(graphtype='occurence')
+#
+# partition = community.best_partition(G)
+# words_by_part = get_words_by_partition(partition)
+#
+#
+# for counter in xrange(0, len(words_by_part)):
+# 	print '\nTopic {}:\n----------'.format(counter)
+# 	H = G.subgraph(words_by_part[counter])
+# 	print ', '.join(graph_cluster.pagerank_top_k(H, 10))
 
-gb = NounPhraseGraphBuilder(text_processing.clean_punctuation_and_stopwords)
+# -- example using non dictionary words
+
+gb = SimpleGraphBuilder(text_processing.only_non_dictionary_words, stem_words=False)
 texts = (article['text'] for article in news.polished())
 gb.load_texts(texts)
-G = gb.create_graph(graphtype='occurence')
+G = gb.create_graph()
 
 partition = community.best_partition(G)
 words_by_part = get_words_by_partition(partition)
-
 
 for counter in xrange(0, len(words_by_part)):
 	print '\nTopic {}:\n----------'.format(counter)
