@@ -3,6 +3,7 @@ import networkx as nx
 import nltk
 from nltk.stem.porter import PorterStemmer
 import igraph
+from tagger import GetNounPhrases
 
 def stem_words(tokens, language='english'):
     """
@@ -187,6 +188,70 @@ class WindowGraphBuilder(GraphBuilder):
         return nx.connected_component_subgraphs(G).next()
     
 
+
+
+
+
+class NounPhraseGraphBuilder(GraphBuilder):
+    '''
+    Tags noun phrases, makes them the nodes.
+    '''
+    def __init__(self, text_cleaner=None, stem_words=False):
+        super(NounPhraseGraphBuilder, self).__init__(text_cleaner, stem_words)
+        self.text_cleaner = text_cleaner
+
+    def sentence_extractor(self):
+        """
+        Extracts sentences from the loaded texts in the object
+        """
+        self.text_sentences = []
+        for text in self.texts:
+            sentences = nltk.sent_tokenize(text)
+            tokens_sentences = []
+            for sentence in sentences:
+                # tokens = nltk.word_tokenize(sentence)
+                tokens = GetNounPhrases(sentence)
+                if self.text_cleaner is not None:
+                    tokens = self.text_cleaner(tokens)
+                    if self.stem_words:
+                        tokens = stem_words(tokens)
+                    
+                tokens_sentences.append(tokens)
+            self.text_sentences.append(tokens_sentences)
+
+    def create_graph(self, graphtype = 'ngram', n = 2):
+
+        G = nx.Graph() 
+        if graphtype.lower() == 'ngram':
+            for text in self.text_sentences:
+                text_words = []
+                for sentence in text:
+                    if not(len(sentence) == 1):
+                        G.add_nodes_from(sentence)
+                        text_words += sentence
+                for sentence in text:
+                    if not (len(sentence) == 1):
+                        for (a, b) in n_word_window(sentence, n):
+                            if G.has_edge(a, b):
+                                G[a][b]['weight'] = G.get_edge_data(a,b)['weight'] + 1.0
+                            else:
+                                G.add_edge(a, b, weight=1.)
+            return nx.connected_component_subgraphs(G).next()
+        elif graphtype.lower() == 'occurence':
+            for text in self.text_sentences:
+                text_words = []
+                for sentence in text:
+                    G.add_nodes_from(sentence)
+                    text_words += sentence
+                for (a,b) in itertools.combinations(text_words,2):
+                    if G.has_edge(a,b):
+                        G[a][b]['weight'] = G.get_edge_data(a,b)['weight'] + 1
+                    else:
+                        G.add_edge(a,b, weight=1. )
+            return G
+        else:
+            raise ValueError, 'graphtype can be either \'occurence\', or \'ngram\'.'
+    
 
         
 
