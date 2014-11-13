@@ -186,15 +186,14 @@ class WindowGraphBuilder(GraphBuilder):
                         else:
                             G.add_edge(a, b, weight=1.)
         return nx.connected_component_subgraphs(G).next()
-    
-
-
 
 
 
 class NounPhraseGraphBuilder(GraphBuilder):
     '''
-    Tags noun phrases, makes them the nodes.
+    Tags noun phrases, makes them the nodes. 
+    You can choose what type of graph to 
+    construct with the create_graph() function.
     '''
     def __init__(self, text_cleaner=None, stem_words=False):
         super(NounPhraseGraphBuilder, self).__init__(text_cleaner, stem_words)
@@ -219,7 +218,7 @@ class NounPhraseGraphBuilder(GraphBuilder):
                 tokens_sentences.append(tokens)
             self.text_sentences.append(tokens_sentences)
 
-    def create_graph(self, graphtype = 'ngram', n = 2):
+    def create_graph(self, graphtype = 'occurence', n = 2):
 
         G = nx.Graph() 
         if graphtype.lower() == 'ngram':

@@ -5,6 +5,11 @@ from sklearn.preprocessing import normalize
 # from scipy.linalg import eigh
 from scipy.sparse.linalg import eigsh
 
+def pagerank_top_k(G, k = 10):
+    pr = nx.pagerank_scipy(G)
+    ky, v = pr.keys(), pr.values()
+    ix = np.argsort(v)[::-1]
+    return np.array(ky)[ix[:k]]
 
 def SpectralEmbedding(G, k = 5):
     '''

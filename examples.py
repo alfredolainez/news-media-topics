@@ -1,4 +1,4 @@
-from words_graph import SimpleGraphBuilder
+from words_graph import SimpleGraphBuilder, NounPhraseGraphBuilder
 from extractor import NewsScraper
 import graph_cluster
 import text_processing
@@ -75,4 +75,30 @@ words_by_part = get_words_by_partition(partition)
 #dendogram = community.generate_dendogram(G)
 #partition = community.partition_at_level(dendogram, 0)
 #partition = community.partition_at_level(dendogram, 1)
+
+
+
+
+
+
+
+
+# -- example using noun phrases
+
+gb = NounPhraseGraphBuilder(text_processing.clean_punctuation_and_stopwords)
+texts = (article['text'] for article in news.polished())
+gb.load_texts(texts)
+G = gb.create_graph(graphtype='occurence')
+
+partition = community.best_partition(G)
+words_by_part = get_words_by_partition(partition)
+
+counter = 1
+for part in words_by_part:
+	print '\nTopic {}:\n----------'.format(counter)
+	print ''.join(graph_cluster.pagerank_top_k(G.subgraph(part), 10))
+	counter += 1
+
+
+
 
