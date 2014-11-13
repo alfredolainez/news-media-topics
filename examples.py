@@ -93,11 +93,11 @@ G = gb.create_graph(graphtype='occurence')
 partition = community.best_partition(G)
 words_by_part = get_words_by_partition(partition)
 
-counter = 1
-for part in words_by_part:
+
+for counter in xrange(0, len(words_by_part)):
 	print '\nTopic {}:\n----------'.format(counter)
-	print ''.join(graph_cluster.pagerank_top_k(G.subgraph(part), 10))
-	counter += 1
+	H = G.subgraph(words_by_part[counter])
+	print ', '.join(graph_cluster.pagerank_top_k(H, 10))
 
 
 
