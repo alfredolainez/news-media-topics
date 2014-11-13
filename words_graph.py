@@ -140,3 +140,59 @@ class SimpleGraphBuilder(GraphBuilder):
             n_text += 1
         return G, ids_by_token
 
+
+
+
+
+def n_word_window(sentence, n = 2):
+    tuples = []
+    for i in xrange(0, (len(sentence) - n + 1)):
+        for w in xrange(1, n):
+            tuples.append((sentence[i], sentence[i + w]))
+    return tuples
+
+
+class WindowGraphBuilder(GraphBuilder):
+    """
+    Makes a graph with a n-word moving window. Example:
+    This is a sentence. This is another sentence a kid could write.
+    \____/                              \________/
+      a                                  same as b
+    \_______/                           \____________/
+        b                                      d
+    \_________________/                 \_________________/
+             c                                    e
+    """
+    def __init__(self, text_cleaner=None, stem_words=True):
+        super(WindowGraphBuilder, self).__init__(text_cleaner, stem_words)
+        self.text_cleaner = text_cleaner
+
+    def create_graph(self, n = 2):
+
+        G = nx.Graph() 
+
+        for text in self.text_sentences:
+            text_words = []
+            for sentence in text:
+                G.add_nodes_from(sentence)
+                text_words += sentence
+            for sentence in text:
+                for (a, b) in n_word_window(sentence, n):
+                    if G.has_edge(a, b):
+                        G[a][b]['weight'] = G.get_edge_data(a,b)['weight'] + 1.0
+                    else:
+                        G.add_edge(a, b, weight=1.)
+        return G
+    
+
+
+        
+
+
+
+
+
+
+
+
+
