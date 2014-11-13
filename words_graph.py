@@ -184,7 +184,7 @@ class WindowGraphBuilder(GraphBuilder):
                             G[a][b]['weight'] = G.get_edge_data(a,b)['weight'] + 1.0
                         else:
                             G.add_edge(a, b, weight=1.)
-        return G
+        return nx.connected_component_subgraphs(G).next()
     
 
 
