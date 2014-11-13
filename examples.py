@@ -3,12 +3,30 @@ from extractor import NewsScraper
 import graph_cluster
 import text_processing
 import time
+import community
+
+
+def get_words_by_partition(partition):
+    """
+    Given a community partition of the form:
+    { "word1": 2, "word2": 1, "word3": 1 .... }
+    it returns the inverse dictionary:
+    { 1: ["word1", "word3"], 2: ["word2"] .... }
+    """
+    words_by_part = {}
+    for elem in partition:
+        if partition[elem] not in words_by_part:
+            words_by_part[partition[elem]] = [elem]
+        else:
+            words_by_part[partition[elem]].append(elem)
+
+    return words_by_part
 
 t0 = time.time()
 
-news = NewsScraper('http://cnn.com', nthreads = 20)
+news = NewsScraper('http://cnn.com', nthreads = 10)
 news.pull()
-news.scrape(10)
+news.scrape(200)
 texts = (article['text'] for article in news.polished())
 
 t1 = time.time()
@@ -20,13 +38,13 @@ gb = SimpleGraphBuilder(text_processing.clean_punctuation_and_stopwords)
 gb.load_texts(texts)
 
 # Show texts in the builder
-for text in texts:
-    print text
-    print "##################################################"
-
-print "##################################################"
-print  "TOKENIZED SENTENCES"
-print "##################################################"
+# for text in texts:
+#     print text
+#     print "##################################################"
+#
+# print "##################################################"
+# print  "TOKENIZED SENTENCES"
+# print "##################################################"
 
 # Show tokenized sentences
 for text in gb.text_sentences[:1]:
@@ -40,10 +58,21 @@ t2 = time.time()
 print "Graph built in %.2f sec" %(t2-t1)
 
 # Clustering
-ex = 2
-r = 2
-tol = 1e-3
-threshold = 1e-5
-M = graph_cluster.MCL_cluster(G,ex,r,tol,threshold)
-t3 = time.time()
-print "Graph clustered in %.2f sec" %(t3-t2)
+# ex = 2
+# r = 2
+# tol = 1e-3
+# threshold = 1e-5
+# M = graph_cluster.MCL_cluster(G,ex,r,tol,threshold)
+# t3 = time.time()
+# print "Graph clustered in %.2f sec" %(t3-t2)
+
+partition = community.best_partition(G)
+
+words_by_part = get_words_by_partition(partition)
+
+# In order to get partitions in a given level of the dendogram (bigger level, smaller communities)
+# although it seems that there are only usually 2 levels...
+#dendogram = community.generate_dendogram(G)
+#partition = community.partition_at_level(dendogram, 0)
+#partition = community.partition_at_level(dendogram, 1)
+
