@@ -174,14 +174,16 @@ class WindowGraphBuilder(GraphBuilder):
         for text in self.text_sentences:
             text_words = []
             for sentence in text:
-                G.add_nodes_from(sentence)
-                text_words += sentence
+                if not(len(sentence) == 1):
+                    G.add_nodes_from(sentence)
+                    text_words += sentence
             for sentence in text:
-                for (a, b) in n_word_window(sentence, n):
-                    if G.has_edge(a, b):
-                        G[a][b]['weight'] = G.get_edge_data(a,b)['weight'] + 1.0
-                    else:
-                        G.add_edge(a, b, weight=1.)
+                if not (len(sentence) == 1):
+                    for (a, b) in n_word_window(sentence, n):
+                        if G.has_edge(a, b):
+                            G[a][b]['weight'] = G.get_edge_data(a,b)['weight'] + 1.0
+                        else:
+                            G.add_edge(a, b, weight=1.)
         return G
     
 
