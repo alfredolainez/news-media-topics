@@ -1,9 +1,74 @@
 import networkx as nx
 import numpy as np
+from collections import defaultdict
 from sklearn.preprocessing import normalize
 
 # from scipy.linalg import eigh
 from scipy.sparse.linalg import eigsh
+
+def overlap_cluster(G, k, I, cliques=None):
+    """
+    Clusters G using the Clique Percolation Method
+    
+    Parameters
+    ----------
+    G : NetworkX graph
+    k : int
+       Size of smallest clique
+    I : double 
+       Intensity threshold for weighted graphs
+       Set I=0 for unweighted graphs
+    cliques: list or generator       
+       Precomputed cliques (use networkx.find_cliques(G))
+    Returns
+    -------
+    Yields sets of nodes, one for each k-clique community.
+    """
+    if k < 2:
+        raise nx.NetworkXError("k=%d, k must be greater than 1."%k)
+    if cliques is None:
+        cliques = nx.find_cliques(G)
+    cliques = [frozenset(c) for c in cliques if (len(c) >= k and _intensity(c) > I)]
+    # First index which nodes are in which cliques
+    membership_dict = defaultdict(list)
+    for clique in cliques:
+        for node in clique:
+            membership_dict[node].append(clique)
+    # For each clique, see which adjacent cliques percolate
+    perc_graph = nx.Graph()
+    perc_graph.add_nodes_from(cliques)
+    for clique in cliques:
+        for adj_clique in _get_adjacent_cliques(clique, membership_dict):
+            if len(clique.intersection(adj_clique)) >= (k - 1):
+                perc_graph.add_edge(clique, adj_clique)
+                
+    # Connected components of clique graph with perc edges
+    # are the percolated cliques
+    for component in nx.connected_components(perc_graph):
+        yield(frozenset.union(*component))
+
+def _intensity(clique):
+    """
+    For unweighted graphs, returns 1
+    """
+    product = 1.0
+    k = 0    
+    for edge in clique:
+        product *= G.get_edge_data(edge)['weight']
+        k += 1
+    if product == 0:
+        return 1
+    else:
+        return product**(1.0/k)
+
+
+def _get_adjacent_cliques(clique, membership_dict):
+    adjacent_cliques = set()
+    for n in clique:
+        for adj_clique in membership_dict[n]:
+            if clique != adj_clique:
+                adjacent_cliques.add(adj_clique)
+    return adjacent_cliques
 
 def pagerank_top_k(G, k = 10):
     pr = nx.pagerank_scipy(G)
