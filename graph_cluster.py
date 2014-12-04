@@ -13,6 +13,7 @@ def overlap_cluster(G, k, I, cliques=None):
     Parameters
     ----------
     G : NetworkX graph
+       Input graph
     k : int
        Size of smallest clique
     I : double 
@@ -27,8 +28,8 @@ def overlap_cluster(G, k, I, cliques=None):
     if k < 2:
         raise nx.NetworkXError("k=%d, k must be greater than 1."%k)
     if cliques is None:
-        cliques = nx.find_cliques(G)
-    cliques = [frozenset(c) for c in cliques if (len(c) >= k and _intensity(c) > I)]
+        cliques = list(nx.find_cliques(G))
+    cliques = [frozenset(c) for c in cliques if (len(c) >= k and _intensity(c,G) > I)]
     # First index which nodes are in which cliques
     membership_dict = defaultdict(list)
     for clique in cliques:
@@ -47,14 +48,14 @@ def overlap_cluster(G, k, I, cliques=None):
     for component in nx.connected_components(perc_graph):
         yield(frozenset.union(*component))
 
-def _intensity(clique):
+def _intensity(clique, G):
     """
     For unweighted graphs, returns 1
     """
     product = 1.0
     k = 0    
-    for edge in clique:
-        product *= G.get_edge_data(edge)['weight']
+    for edge in nx.subgraph(G,clique).edges():
+        product *= G.get_edge_data(edge[0],edge[1])['weight']
         k += 1
     if product == 0:
         return 1
@@ -147,13 +148,18 @@ if __name__ == '__main__':
     L = ['a','b','c','d']
     G.add_nodes_from(L)
     G.add_weighted_edges_from([('a','b',1),('c','b',2),('c','a',1),('d','a',1)])
-    mat = np.array(nx.adj_matrix(G))
+    
+    G = nx.fast_gnp_random_graph(40,.5)
+    part = overlap_cluster(G,2,0)
+    for p in part:
+        print p
+#    mat = np.array(nx.adj_matrix(G))
 #    G = nx.fast_gnp_random_graph(40,.5)
 #    mat[0,0] = 10
-    tol = 1e-5
-    threshold = 1e-5
-    ex = 2
-    r = 2
-    print mat
-    m = MCL_cluster(G,ex,r,tol,threshold)
-    print m
+#    tol = 1e-5
+#    threshold = 1e-5
+#    ex = 2
+#    r = 2
+#    print mat
+#    m = MCL_cluster(G,ex,r,tol,threshold)
+#    print m

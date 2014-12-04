@@ -26,7 +26,7 @@ t0 = time.time()
 
 news = NewsScraper('http://cnn.com', nthreads = 10)
 news.pull()
-news.scrape(200)
+news.scrape(10)
 texts = (article['text'] for article in news.polished())
 
 t1 = time.time()
