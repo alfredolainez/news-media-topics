@@ -5,6 +5,8 @@ from nltk.stem.porter import PorterStemmer
 import igraph
 from tagger import GetNounPhrases
 
+MIN_CHAR_TEXT = 1000
+
 def stem_words(tokens, language='english'):
     """
     Stems words in a list of tokens
@@ -57,7 +59,9 @@ class GraphBuilder(object):
         # Initial treatment of texts. Everything is lowered
         self.texts = []
         for text in texts:
-            self.texts.append(text.lower())
+            # Some scraped news are just short phrases: discard them
+            if len(text) > MIN_CHAR_TEXT:
+                self.texts.append(text.lower())
 
         self.sentence_extractor()
 
