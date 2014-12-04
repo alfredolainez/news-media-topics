@@ -6,7 +6,33 @@ from sklearn.preprocessing import normalize
 # from scipy.linalg import eigh
 from scipy.sparse.linalg import eigsh
 
-def overlap_cluster(G, k, I, cliques=None):
+def get_overlap_clusters(G, k, I, cliques=None):
+    clusters = {}
+    id_c = 0;
+    for cluster in _CPM_cluster(G, k, I, cliques):
+        clusters[id_c] = list(cluster)
+        id_c += 1
+    return clusters
+    """
+    Clusters G using the Clique Percolation Method
+    
+    Parameters
+    ----------
+    G : NetworkX graph
+       Input graph
+    k : int
+       Size of smallest clique
+    I : double 
+       Intensity threshold for weighted graphs
+       Set I=0 for unweighted graphs
+    cliques: list or generator       
+       Precomputed cliques (use networkx.find_cliques(G))
+    Returns
+    -------
+    Yields dictionnary of clusters.
+    """
+
+def _CPM_cluster(G, k, I, cliques=None):
     """
     Clusters G using the Clique Percolation Method
     
@@ -149,10 +175,12 @@ if __name__ == '__main__':
     G.add_nodes_from(L)
     G.add_weighted_edges_from([('a','b',1),('c','b',2),('c','a',1),('d','a',1)])
     
-    G = nx.fast_gnp_random_graph(40,.5)
-    part = overlap_cluster(G,2,0)
-    for p in part:
-        print p
+#    G = nx.fast_gnp_random_graph(40,.5)
+    part = get_overlap_clusters(G,2,0)
+#    part = _CPM_cluster(G,2,0)
+#    for p in part:
+#        print p
+    
 #    mat = np.array(nx.adj_matrix(G))
 #    G = nx.fast_gnp_random_graph(40,.5)
 #    mat[0,0] = 10

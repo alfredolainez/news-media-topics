@@ -66,9 +66,11 @@ print "Graph built in %.2f sec" %(t2-t1)
 # t3 = time.time()
 # print "Graph clustered in %.2f sec" %(t3-t2)
 
+# LOUVAIN
 partition = community.best_partition(G)
-
 words_by_part = get_words_by_partition(partition)
+# OVERLAPPING
+words_by_part = graph_cluster.get_overlap_clusters(G, 2, 1)
 
 # In order to get partitions in a given level of the dendogram (bigger level, smaller communities)
 # although it seems that there are only usually 2 levels...
