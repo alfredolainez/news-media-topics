@@ -1,4 +1,3 @@
-
 from words_graph import SimpleGraphBuilder, NounPhraseGraphBuilder
 from extractor import NewsScraper
 import graph_cluster
@@ -31,8 +30,9 @@ def get_news(url, number):
     t0 = time.time()
     news = NewsScraper('http://cnn.com', nthreads = 10)
     news.pull()
-    news.scrape(20)
-    texts = (article['text'] for article in news.polished())
+    news.scrape(number)
+    texts = [article['text'] for article in news.polished()]
+    print "Scraped %d articles" % len(texts)
 
     return texts
 
@@ -74,3 +74,20 @@ def get_topics_non_dictionary(num_news, url='http://cnn.com'):
     print_topics_from_partitions(G, words_by_part, 10)
 
     return G
+
+def get_topics_ngrams(num_news, url='http://cnn.com'):
+
+    texts = get_news(url, num_news)
+
+    gb = NounPhraseGraphBuilder(text_processing.clean_punctuation_and_stopwords)
+    gb.load_texts(texts)
+    G = gb.create_graph()
+    print "Graph built"
+
+    partition = community.best_partition(G)
+    words_by_part = get_words_by_partition(partition)
+
+    print_topics_from_partitions(G, words_by_part, 10)
+
+    return G
+
