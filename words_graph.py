@@ -141,17 +141,12 @@ class SimpleGraphBuilder(GraphBuilder):
             n_text += 1
         return G, ids_by_token
 
-
-
-
-
 def n_word_window(sentence, n = 2):
     tuples = []
     for i in xrange(0, (len(sentence) - n + 1)):
         for w in xrange(1, n):
             tuples.append((sentence[i], sentence[i + w]))
     return tuples
-
 
 class WindowGraphBuilder(GraphBuilder):
     """

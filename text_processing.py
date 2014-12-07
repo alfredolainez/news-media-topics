@@ -6,6 +6,7 @@ import string
 import enchant
 
 import nltk
+from nltk.tag import pos_tag
 
 
 def clean_stopwords(tokens):
@@ -61,5 +62,12 @@ def only_non_dictionary_words(tokens):
     tokens = remove_dictionary_words(tokens)
     # To do: some particles like nt remain...
     return tokens
+
+def clean_all_only_nouns(tokens):
+    tokens = remove_punctuation(tokens)
+    tokens = clean_stopwords(tokens)
+    tags = pos_tag(tokens)
+    nouns = [word for word, POS in tags if 'NN' in POS]
+    return nouns
 
 

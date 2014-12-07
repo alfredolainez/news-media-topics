@@ -1,4 +1,4 @@
-from words_graph import SimpleGraphBuilder, NounPhraseGraphBuilder
+from words_graph import SimpleGraphBuilder, NounPhraseGraphBuilder, WindowGraphBuilder
 from extractor import NewsScraper
 import graph_cluster
 import text_processing
@@ -26,9 +26,9 @@ def get_words_by_partition(partition):
 
 t0 = time.time()
 
-news = NewsScraper('http://cnn.com', nthreads = 10)
+news = NewsScraper('http://cnn.com', nthreads = 100)
 news.pull()
-news.scrape(200)
+news.scrape(500)
 texts = (article['text'] for article in news.polished())
 
 t1 = time.time()
@@ -80,26 +80,56 @@ words_by_part = get_words_by_partition(partition)
 
 
 
+#-- example using nouns
+
+gb = SimpleGraphBuilder(text_processing.clean_all_only_nouns, stem_words = True)
+texts = (article['text'] for article in news.polished())
+gb.load_texts(texts)
+G = gb.create_graph()
+
+partition = community.best_partition(G)
+words_by_part = get_words_by_partition(partition)
+
+
+for counter in xrange(0, len(words_by_part)):
+	print '\nTopic {}:\n----------'.format(counter)
+	H = G.subgraph(words_by_part[counter])
+	print ', '.join(graph_cluster.pagerank_top_k(H, 10))
+
+
+#-- example using ngrams phrases
+
+gb = WindowGraphBuilder(text_processing.clean_punctuation_and_stopwords, stem_words = False)
+texts = (article['text'] for article in news.polished())
+gb.load_texts(texts)
+G = gb.create_graph(n=2)
+
+partition = community.best_partition(G)
+words_by_part = get_words_by_partition(partition)
+
+
+for counter in xrange(0, len(words_by_part)):
+	print '\nTopic {}:\n----------'.format(counter)
+	H = G.subgraph(words_by_part[counter])
+	print ', '.join(graph_cluster.pagerank_top_k(H, 10))
 
 
 
+#-- example using noun phrases
+
+gb = NounPhraseGraphBuilder(text_processing.clean_punctuation_and_stopwords)
+texts = (article['text'] for article in news.polished())
+gb.load_texts(texts)
+G = gb.create_graph(graphtype='occurence')
+
+partition = community.best_partition(G)
+words_by_part = get_words_by_partition(partition)
 
 
-# -- example using noun phrases
-#
-# gb = NounPhraseGraphBuilder(text_processing.clean_punctuation_and_stopwords)
-# texts = (article['text'] for article in news.polished())
-# gb.load_texts(texts)
-# G = gb.create_graph(graphtype='occurence')
-#
-# partition = community.best_partition(G)
-# words_by_part = get_words_by_partition(partition)
-#
-#
-# for counter in xrange(0, len(words_by_part)):
-# 	print '\nTopic {}:\n----------'.format(counter)
-# 	H = G.subgraph(words_by_part[counter])
-# 	print ', '.join(graph_cluster.pagerank_top_k(H, 10))
+for counter in xrange(0, len(words_by_part)):
+	print '\nTopic {}:\n----------'.format(counter)
+	H = G.subgraph(words_by_part[counter])
+	print ', '.join(graph_cluster.pagerank_top_k(H, 10))
 
 # -- example using non dictionary words
 
@@ -125,8 +155,8 @@ texts = (article['text'] for article in news.polished())
 gb.load_texts(texts)
 G = gb.create_graph(graphtype='occurence')
 
-X = scale(graph_cluster.SpectralEmbedding(G, k = 20))
-kmeans = KMeans(init='k-means++', n_clusters=20, n_init=10)
+X = scale(graph_cluster.SpectralEmbedding(G, k = 15))
+kmeans = KMeans(init='k-means++', n_clusters=5, n_init=100)
 
 clusters = kmeans.fit_predict(X)
 
