@@ -37,6 +37,14 @@ def get_news(url, number):
 
     return texts
 
+def get_topics_from_partitions(G, words_by_part, num_words_per_topic=10):
+    topics = []
+    for counter in xrange(0, len(words_by_part)):
+        H = G.subgraph(words_by_part[counter])
+        topics.append(graph_cluster.pagerank_top_k(H, num_words_per_topic).tolist())
+
+    return topics
+
 def print_topics_from_partitions(G, words_by_part, num_words_per_topic=10):
 
     for counter in xrange(0, len(words_by_part)):
