@@ -6,19 +6,17 @@ import community
 import topics
 import codecs
 
-true_topics = [['typhoon', 'philippines', 'rain', 'storm', 'flooding', 'rainfall', 'winds', 'hagupit', 'tacloban', 'cyclone', 'assistance', 'manila'],
-          ['hostage', 'escape', 'philippines', 'islamist', 'extremists', 'swiss', 'rebels', 'shoot', 'military', 'injury'],
-          ['isis', 'iran', 'united', 'states', 'military', 'bombing', 'terrorist', 'islamist', 'secretary', 'obama', 'kobani', 'syria', 'civilians', 'warplanes', 'mortar', 'fight', 'graves', 'died'],
-          ['obama', 'president', 'throat', 'inflammation', 'sore', 'hospital', 'health', 'acid', 'white', 'physician'],
-          ['mars', 'nasa', 'science', 'fiction', 'space', 'human', 'earth', 'comet', 'technology', 'women', 'orion', 'capsule', 'first', 'flight', 'astronauts', 'craft', 'test'],
-          ['obama', 'racism', 'interview', 'progress', 'police', 'racial', 'tensions', 'black', 'death', 'race', 'eric', 'garner', 'daughter', 'officer', 'death', 'chokehold', 'jail', 'new york', 'justice', 'camera', 'cops', 'officers', 'body', 'video', 'law', 'death' ],
-          ['clinton', 'secretary', 'presidential', 'speech', 'gathering', 'obama'],
-          ['iran', 'correspondent', 'laws', 'charged', 'tehran', 'detained', 'american', 'arrest', 'crimes', 'imprisonment'],
-          ['clinton', 'obama', 'iran', 'nuclear', 'negotiation', 'presidential', 'communications', 'secretary', 'deal', 'israel' ],
-          ['israel', 'syria', 'strike', 'military', 'attack', 'war', 'warplanes', 'target', 'weapons', 'obama'],
-          ['qaeda', 'leaders', 'killed', 'attack', 'taliban', 'pakistan', 'afghanistan', 'border', 'bomb', 'military'],
-          ['obama', 'hostage', 'rescue', 'attempt', 'raid','killed', 'yemen', 'qaeda', 'forces', 'secretary']
-          ]
+true_topics = get_gold_topics('gold/topics.txt')
+
+def get_gold_topics(filename):
+    FileIn = open(filename)
+    LinesIn = FileIn.readlines()
+    Topics = []
+    for line in LinesIn:
+        if line[0:5] == "TOPIC":
+            continue
+        Topics.append(line.strip().split(' '))
+    return Topics
 
 def read_golden_file(filename):
     text = ""
@@ -77,6 +75,25 @@ def compute_score(computed_topics, real_topics):
         topics_scores.append(score)
 
     return numpy.mean(topics_scores)
+
+if __name__ == '__main__':
+    """ 
+    debugging  code
+    """
+    print true_topics
+
+#true_topics = [['typhoon', 'philippines', 'rain', 'storm', 'flooding', 'rainfall', 'winds', 'hagupit', 'tacloban', 'cyclone', 'assistance', 'manila'],
+#          ['hostage', 'escape', 'philippines', 'islamist', 'extremists', 'swiss', 'rebels', 'shoot', 'military', 'injury'],
+#          ['isis', 'iran', 'united', 'states', 'military', 'bombing', 'terrorist', 'islamist', 'secretary', 'obama', 'kobani', 'syria', 'civilians', 'warplanes', 'mortar', 'fight', 'graves', 'died'],
+#          ['obama', 'president', 'throat', 'inflammation', 'sore', 'hospital', 'health', 'acid', 'white', 'physician'],
+#          ['mars', 'nasa', 'science', 'fiction', 'space', 'human', 'earth', 'comet', 'technology', 'women', 'orion', 'capsule', 'first', 'flight', 'astronauts', 'craft', 'test'],
+#          ['obama', 'racism', 'interview', 'progress', 'police', 'racial', 'tensions', 'black', 'death', 'race', 'eric', 'garner', 'daughter', 'officer', 'death', 'chokehold', 'jail', 'new york', 'justice', 'camera', 'cops', 'officers', 'body', 'video', 'law', 'death' ],
+#          ['clinton', 'secretary', 'presidential', 'speech', 'gathering', 'obama'],
+#          ['iran', 'correspondent', 'laws', 'charged', 'tehran', 'detained', 'american', 'arrest', 'crimes', 'imprisonment'],
+#          ['clinton', 'obama', 'iran', 'nuclear', 'negotiation', 'presidential', 'communications', 'secretary', 'deal', 'israel' ],
+#          ['israel', 'syria', 'strike', 'military', 'attack', 'war', 'warplanes', 'target', 'weapons', 'obama'],
+#          ['qaeda', 'leaders', 'killed', 'attack', 'taliban', 'pakistan', 'afghanistan', 'border', 'bomb', 'military'],
+#          ['obama', 'hostage', 'rescue', 'attempt', 'raid','killed', 'yemen', 'qaeda', 'forces', 'secretary']]
 
 # computed_topics = [[u'shukrijumah',
 #   u'qaeda',
