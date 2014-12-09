@@ -41,17 +41,30 @@ def evaluate():
 
     texts = get_texts()
     gb = words_graph.SimpleGraphBuilder(text_processing.clean_punctuation_and_stopwords, stem_words=False)
+    #gb = words_graph.SimpleGraphBuilder(text_processing.only_non_dictionary_words, stem_words=False)
+    #gb = words_graph.WindowGraphBuilder(text_processing.clean_punctuation_and_stopwords, stem_words=False)
+    #gb = words_graph.NounPhraseGraphBuilder(text_processing.only_non_dictionary_words, stem_words=False)
+
     gb.load_texts(texts)
     G = gb.create_graph()
 
     partition = community.best_partition(G)
-    words_by_part = topics.get_words_by_partition(partition)
+    #words_by_part = topics.get_words_by_partition(partition)
+    words_by_part = graph_cluster.get_overlap_clusters(G, 9, 1)
 
     computed_topics = topics.get_topics_from_partitions(G, words_by_part)
 
+    #Word splitter
+    # computed_topics2 = []
+    # for topic in computed_topics:
+    #     new_topic = []
+    #     for phrase in topic:
+    #         new_topic.extend(phrase.split(' '))
+    #     computed_topics2.append(new_topic)
+
     print compute_score(computed_topics, true_topics)
 
-    topics.print_topics_from_partitions(G, words_by_part, 10)
+    #topics.print_topics_from_partitions(G, words_by_part, 10)
 
 
 def compute_score(computed_topics, real_topics):
@@ -72,11 +85,11 @@ def compute_score(computed_topics, real_topics):
         score = 0
         if max_intersection > 0:
             score = 1
-            score += ((max_intersection - 1) * 1.0/(min(max_len, len(topic)) - 1))**(1.0/3)
+            score += ((max_intersection - 1) * 1.0/max((min(max_len, len(topic)) - 1), 1))**(1.0/3)
 
         topics_scores.append(score)
 
-    return numpy.mean(topics_scores)
+    return numpy.mean(topics_scores)/2
 
 # computed_topics = [[u'shukrijumah',
 #   u'qaeda',
