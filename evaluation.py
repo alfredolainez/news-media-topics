@@ -6,8 +6,6 @@ import community
 import topics
 import codecs
 
-true_topics = get_gold_topics('gold/topics.txt')
-
 def get_gold_topics(filename):
     FileIn = open(filename)
     LinesIn = FileIn.readlines()
@@ -76,11 +74,15 @@ def compute_score(computed_topics, real_topics):
 
     return numpy.mean(topics_scores)
 
+true_topics = get_gold_topics('gold/topics.txt')
+
 if __name__ == '__main__':
     """ 
     debugging  code
     """
     print true_topics
+
+
 
 #true_topics = [['typhoon', 'philippines', 'rain', 'storm', 'flooding', 'rainfall', 'winds', 'hagupit', 'tacloban', 'cyclone', 'assistance', 'manila'],
 #          ['hostage', 'escape', 'philippines', 'islamist', 'extremists', 'swiss', 'rebels', 'shoot', 'military', 'injury'],
