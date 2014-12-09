@@ -55,11 +55,18 @@ def clean_punctuation_and_stopwords(tokens):
     tokens = clean_stopwords(tokens)
     return tokens
 
-def only_non_dictionary_words(tokens):
+def only_non_dictionary_words(tokens, remove = ['nt', 've', 'fox', 'huff', 'cnn']):
     tokens = remove_punctuation(tokens)
     tokens = clean_stopwords(tokens)
     tokens = remove_dictionary_words(tokens)
     # To do: some particles like nt remain...
-    return tokens
+
+    def _passes(word):
+        if sum(p in word for p in remove) > 0:
+            return False
+        return word.isalpha()
+        # return True
+
+    return [t for t in tokens if _passes(t)]
 
 

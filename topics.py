@@ -23,13 +23,13 @@ def get_words_by_partition(partition):
 
     return words_by_part
 
-def get_news(url, number):
+def get_news(url, number, nthreads = 10):
     """
     Retrieves news from the specified source
     """
 
     t0 = time.time()
-    news = NewsScraper(url, nthreads = 10)
+    news = NewsScraper(url, nthreads = nthreads)
     news.pull()
     news.scrape(number)
     texts = [article['text'] for article in news.polished()]
@@ -132,7 +132,7 @@ def get_topics_non_dictionary_overlapping(num_news, k, url='http://cnn.com'):
     texts = get_news(url, num_news)
 
     gb = SimpleGraphBuilder(text_processing.only_non_dictionary_words, stem_words=False)
-    gb.load_texts(texts)
+    gb.load_texts(texts) 
     G = gb.create_graph()
     print "Graph built"
 
