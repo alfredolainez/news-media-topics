@@ -64,6 +64,9 @@ def get_topics_by_standard_words(num_news, draw=False, url='http://cnn.com'):
     partition = community.best_partition(G)
     words_by_part = get_words_by_partition(partition)
 
+    mod = community.modularity(partition,G)
+    print("modularity:", mod)
+
     print_topics_from_partitions(G, words_by_part, 10)
     if draw:
         values = [partition.get(node) for node in G.nodes()]
@@ -93,7 +96,9 @@ def get_topics_non_dictionary(num_news, draw=False, url='http://cnn.com'):
         nx.draw_spring(G, cmap = plt.get_cmap('jet'), node_color = values, node_size=30, with_labels=False)
         plt.show()
 
-    return G
+    topics = get_topics_from_partitions(G, words_by_part, 10)
+
+    return G, topics
 
 def get_topics_noun_phrases(num_news, draw=False, url='http://cnn.com'):
 
@@ -112,13 +117,15 @@ def get_topics_noun_phrases(num_news, draw=False, url='http://cnn.com'):
     mod = community.modularity(partition,G)
     print("modularity:", mod)
 
-    print_topics_from_partitions(G, words_by_part, 10)
+    #print_topics_from_partitions(G, words_by_part, 10)
     if draw:
         values = [partition.get(node) for node in G.nodes()]
         nx.draw_spring(G, cmap = plt.get_cmap('jet'), node_color = values, node_size=30, with_labels=False)
         plt.show()
 
-    return G
+    topics = get_topics_from_partitions(G, words_by_part, 10)
+
+    return G, topics
 
 def get_topics_non_dictionary_overlapping(num_news, k, url='http://cnn.com'):
 
@@ -131,7 +138,7 @@ def get_topics_non_dictionary_overlapping(num_news, k, url='http://cnn.com'):
 
     words_by_part = graph_cluster.get_overlap_clusters(G, k, 1)
 
-    print_topics_from_partitions(G, words_by_part, 10)
+    #print_topics_from_partitions(G, words_by_part, 10)
 
     return G
 
@@ -146,6 +153,8 @@ def get_topics_noun_phrases_overlapping(num_news, k, url='http://cnn.com'):
 
     words_by_part = graph_cluster.get_overlap_clusters(G, k, 1)
 
-    print_topics_from_partitions(G, words_by_part, 10)
+    #print_topics_from_partitions(G, words_by_part, 10)
 
-    return G
+    topics = get_topics_from_partitions(G, words_by_part, 10)
+
+    return G, topics
